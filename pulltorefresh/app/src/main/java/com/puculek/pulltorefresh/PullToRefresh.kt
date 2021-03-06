@@ -1,48 +1,38 @@
 package com.puculek.pulltorefresh
 
-import android.util.Log
-import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.rememberScrollableState
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.CombinedModifier
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Velocity
-import kotlinx.coroutines.delay
+import androidx.compose.ui.unit.dp
 
 
+private const val MAX_OFFSET = 400f
+private const val MIN_REFRESH_OFFSET = 250f
+private const val PERCENT_INDICATOR_PROGRESS_ON_DRAG = 0.85f
+private const val BASE_OFFSET = -48
+
+
+/**
+ * A layout composable with [content].
+ *
+ * Example usage:
+ * @sample com.puculek.pulltorefresh.samples.PullToRefreshPreview
+ *
+ * @param modifier The modifier to be applied to the layout.
+ * @param isRefreshing Flag describing if [SwipeRefreshLayout] is refreshing.
+ * @param onRefresh Callback to be called if layout is pulled to refresh.
+ * @param content The content of the [SwipeRefreshLayout].
+ */
 @Composable
 fun SwipeRefreshLayout(
     modifier: Modifier = Modifier,
@@ -50,164 +40,137 @@ fun SwipeRefreshLayout(
     onRefresh: () -> Unit,
     content: @Composable () -> Unit
 ) {
-    val max by remember { mutableStateOf(400f) }
-    val minimumOffsetToRefresh by remember { mutableStateOf(250f) }
-    var d by remember { mutableStateOf(0f) }
+    var indicatorOffset by remember { mutableStateOf(0f) }
+
+    // check if isRefreshing has been changed
     var isRefreshingInternal by remember { mutableStateOf(false) }
-    var isFinishingRefresh by remember { mutableStateOf(false) }
+
+    // User cancelled dragging before reaching MAX_REFRESH_OFFSET
     var isResettingScroll by remember { mutableStateOf(false) }
+
+    // How much should indicator scroll to reset its position
     var scrollToReset by remember { mutableStateOf(0f) }
-    Log.d("FFVII", "d: $d")
-    val scale by animateFloatAsState(
+
+    // Trigger for scaling animation
+    var isFinishingRefresh by remember { mutableStateOf(false) }
+
+    val scaleAnimation by animateFloatAsState(
         targetValue = if (isFinishingRefresh) 0f else 1f,
         finishedListener = {
-            Log.d("FFVII", "finished")
-            d = 0f
+            indicatorOffset = 0f
             isFinishingRefresh = false
         })
-    val offset by animateFloatAsState(
-        targetValue = if (isRefreshing || isFinishingRefresh) d - minimumOffsetToRefresh else 0f
+    val offsetAnimation by animateFloatAsState(
+        targetValue = if (isRefreshing || isFinishingRefresh) {
+            indicatorOffset - MIN_REFRESH_OFFSET
+        } else {
+            0f
+        }
     )
-    val resettingScrollOffset by animateFloatAsState(
-        targetValue = if (isResettingScroll) scrollToReset else 0f,
+    val resettingScrollOffsetAnimation by animateFloatAsState(
+        targetValue = if (isResettingScroll) {
+            scrollToReset
+        } else {
+            0f
+        },
         finishedListener = {
-            Log.d("FFVII", "finishedListener")
             if (isResettingScroll) {
-                d = 0f
+                indicatorOffset = 0f
                 isResettingScroll = false
             }
         })
 
     if (isResettingScroll) {
-        d -= resettingScrollOffset
+        indicatorOffset -= resettingScrollOffsetAnimation
     }
-
     if (!isRefreshing && isRefreshingInternal) {
         isFinishingRefresh = true
         isRefreshingInternal = false
     }
+    if (isRefreshing && !isRefreshingInternal) {
+        isRefreshingInternal = true
+    }
 
-    val inner = Modifier
-        .nestedScroll(
-            object : NestedScrollConnection {
-                override fun onPostScroll(
-                    consumed: Offset,
-                    available: Offset,
-                    source: NestedScrollSource
-                ): Offset {
-                    Log.d("FFVII", "postScroll: consumed: $consumed, available: $available")
-                    if (!isRefreshing && source == NestedScrollSource.Drag) {
-                        val diff = if (d + available.y > max) {
-                            available.y - (d + available.y - max)
-                        } else {
-                            available.y
-                        }
-                        d += diff
-                        return Offset(0f, diff)
-                    }
-                    return super.onPostScroll(consumed, available, source)
+    val nestedScrollConnection = object : NestedScrollConnection {
+
+        override fun onPostScroll(
+            consumed: Offset,
+            available: Offset,
+            source: NestedScrollSource
+        ): Offset {
+            if (!isRefreshing && source == NestedScrollSource.Drag) {
+                val diff = if (indicatorOffset + available.y > MAX_OFFSET) {
+                    available.y - (indicatorOffset + available.y - MAX_OFFSET)
+                } else {
+                    available.y
                 }
+                indicatorOffset += diff
+                return Offset(0f, diff)
+            }
+            return super.onPostScroll(consumed, available, source)
+        }
 
-                override fun onPreScroll(
-                    available: Offset,
-                    source: NestedScrollSource
-                ): Offset {
-                    if (!isRefreshing && source == NestedScrollSource.Drag) {
-                        if (available.y < 0 && d > 0) {
-                            val diff = if (d + available.y < 0) {
-                                Log.d("FFVII", "prescroll")
-                                d = 0f
-                                d
-                            } else {
-                                d += available.y
-                                available.y
-                            }
-//                            d += diff
-                            isFinishingRefresh = false
-                            return Offset.Zero.copy(y = diff)
-                        }
+        override fun onPreScroll(
+            available: Offset,
+            source: NestedScrollSource
+        ): Offset {
+            if (!isRefreshing && source == NestedScrollSource.Drag) {
+                if (available.y < 0 && indicatorOffset > 0) {
+                    val diff = if (indicatorOffset + available.y < 0) {
+                        indicatorOffset = 0f
+                        indicatorOffset
+                    } else {
+                        indicatorOffset += available.y
+                        available.y
                     }
-                    return super.onPreScroll(available, source)
-                }
-
-                override suspend fun onPostFling(
-                    consumed: Velocity,
-                    available: Velocity
-                ): Velocity {
-                    if (!isRefreshing) {
-                        if (d > minimumOffsetToRefresh) {
-                            onRefresh()
-                            Log.d("FFIX", "onRefresh")
-                            isRefreshingInternal = true
-                        } else {
-                            isResettingScroll = true
-                            scrollToReset = d
-//                        d = 0f
-                        }
-                    }
-                    return super.onPostFling(consumed, available)
+                    isFinishingRefresh = false
+                    return Offset.Zero.copy(y = diff)
                 }
             }
-        )
+            return super.onPreScroll(available, source)
+        }
+
+        override suspend fun onPostFling(
+            consumed: Velocity,
+            available: Velocity
+        ): Velocity {
+            if (!isRefreshing) {
+                if (indicatorOffset > MIN_REFRESH_OFFSET) {
+                    onRefresh()
+                    isRefreshingInternal = true
+                } else {
+                    isResettingScroll = true
+                    scrollToReset = indicatorOffset
+                }
+            }
+            return super.onPostFling(consumed, available)
+        }
+    }
 
     Box(
         modifier = CombinedModifier(
-            inner = inner,
+            inner = Modifier.nestedScroll(nestedScrollConnection),
             outer = modifier
         )
     ) {
         content()
 
-        val absoluteOffset = with(LocalDensity.current) {
-            val offsetPx = if (isRefreshing || isFinishingRefresh) {
-                offset
-            } else {
-                0f
-            }
-            (-48).dp + (d - offsetPx).toDp()
+        val offsetPx = if (isRefreshing || isFinishingRefresh) {
+            offsetAnimation
+        } else {
+            0f
+        }
+        val absoluteOffset = BASE_OFFSET.dp + with(LocalDensity.current) {
+            (indicatorOffset - offsetPx).toDp()
         }
 
         PullToRefreshProgressIndicator(
             modifier = Modifier
                 .fillMaxWidth()
                 .absoluteOffset(y = absoluteOffset)
-                .scale(scale)
-                .rotate(if (d > 200f) (d - 200) else 0f),
-            progress = if (!isRefreshing) d / max * 0.85f else null
+                .scale(scaleAnimation)
+                .rotate(if (indicatorOffset > MIN_REFRESH_OFFSET) (indicatorOffset - MIN_REFRESH_OFFSET) else 0f),
+            progress = if (!isRefreshing) indicatorOffset / MAX_OFFSET * PERCENT_INDICATOR_PROGRESS_ON_DRAG else null
         )
-    }
-}
-
-@Preview
-@Composable
-fun SwipeRefreshLayoutPreview() {
-    var isRefreshing: Boolean by remember { mutableStateOf(false) }
-    Log.d("FFVII", "isRefreshing: $isRefreshing")
-    val scope = rememberCoroutineScope()
-    SwipeRefreshLayout(
-        isRefreshing = isRefreshing,
-        onRefresh = {
-            isRefreshing = true
-            scope.launch {
-                delay(1000)
-                isRefreshing = false
-            }
-
-        }
-    ) {
-        LazyColumn(
-        ) {
-            (0..20).map {
-                item {
-                    Text(
-                        text = "scrollState: ${1} WSLFDKFSDL SDLFK S:DLF KSD:LF KSD:LF KSDL:FK SLG KERGS K: $it",
-                        modifier = Modifier
-                            .padding(64.dp)
-                            .background(Color.Cyan)
-                            .padding(24.dp)
-                    )
-                }
-            }
-        }
     }
 }

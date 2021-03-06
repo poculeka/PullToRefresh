@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 
 
 @Composable
-fun PullToRefreshProgressIndicator(
+internal fun PullToRefreshProgressIndicator(
     modifier: Modifier = Modifier,
     progress: Float? = null
 ) {
