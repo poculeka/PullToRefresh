@@ -1,3 +1,3 @@
 PullToRefresh Jetpack Compose component.
 
-![](pulltorefresh/pulltorefresh.gif)
+![](gifs/pulltorefresh.gif)
