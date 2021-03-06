@@ -8,3 +8,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "PullToRefresh"
 include ':app'
+include ':pulltorefresh'

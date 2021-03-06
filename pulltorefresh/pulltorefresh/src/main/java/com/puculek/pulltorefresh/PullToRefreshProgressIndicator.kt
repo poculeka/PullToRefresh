@@ -13,7 +13,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-
 @Composable
 internal fun PullToRefreshProgressIndicator(
     modifier: Modifier = Modifier,
@@ -29,7 +28,7 @@ internal fun PullToRefreshProgressIndicator(
             elevation = 6.dp,
             backgroundColor = Color.White
         ) {
-            if(progress == null) {
+            if (progress == null) {
                 CircularProgressIndicator(
                     modifier = Modifier.scale(.66f),
                     strokeWidth = ProgressIndicatorDefaults.StrokeWidth * 1.25f,

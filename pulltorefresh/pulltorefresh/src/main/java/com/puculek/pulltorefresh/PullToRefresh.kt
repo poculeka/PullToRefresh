@@ -29,12 +29,12 @@ private const val BASE_OFFSET = -48
  * @sample com.puculek.pulltorefresh.samples.PullToRefreshPreview
  *
  * @param modifier The modifier to be applied to the layout.
- * @param isRefreshing Flag describing if [SwipeRefreshLayout] is refreshing.
+ * @param isRefreshing Flag describing if [PullToRefresh] is refreshing.
  * @param onRefresh Callback to be called if layout is pulled to refresh.
- * @param content The content of the [SwipeRefreshLayout].
+ * @param content The content of the [PullToRefresh].
  */
 @Composable
-fun SwipeRefreshLayout(
+fun PullToRefresh(
     modifier: Modifier = Modifier,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
