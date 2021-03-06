@@ -101,6 +101,8 @@ fun SwipeRefreshLayout(
             if (!isRefreshing && source == NestedScrollSource.Drag) {
                 val diff = if (indicatorOffset + available.y > MAX_OFFSET) {
                     available.y - (indicatorOffset + available.y - MAX_OFFSET)
+                } else if (indicatorOffset + available.y < 0) {
+                    0f
                 } else {
                     available.y
                 }
