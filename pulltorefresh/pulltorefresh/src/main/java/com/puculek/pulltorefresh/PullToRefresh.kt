@@ -29,6 +29,8 @@ private const val BASE_OFFSET = -48
  * @sample com.puculek.pulltorefresh.samples.PullToRefreshPreview
  *
  * @param modifier The modifier to be applied to the layout.
+ * @param maxOffset How many pixels can the progress indicator can be dragged down
+ * @param minRefreshOffset Minimum drag value to trigger [onRefresh]
  * @param isRefreshing Flag describing if [PullToRefresh] is refreshing.
  * @param onRefresh Callback to be called if layout is pulled to refresh.
  * @param content The content of the [PullToRefresh].
@@ -36,6 +38,8 @@ private const val BASE_OFFSET = -48
 @Composable
 fun PullToRefresh(
     modifier: Modifier = Modifier,
+    maxOffset: Float = MAX_OFFSET,
+    minRefreshOffset: Float = MIN_REFRESH_OFFSET,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
     content: @Composable () -> Unit
@@ -62,7 +66,7 @@ fun PullToRefresh(
         })
     val offsetAnimation by animateFloatAsState(
         targetValue = if (isRefreshing || isFinishingRefresh) {
-            indicatorOffset - MIN_REFRESH_OFFSET
+            indicatorOffset - minRefreshOffset
         } else {
             0f
         }
@@ -99,8 +103,8 @@ fun PullToRefresh(
             source: NestedScrollSource
         ): Offset {
             if (!isRefreshing && source == NestedScrollSource.Drag) {
-                val diff = if (indicatorOffset + available.y > MAX_OFFSET) {
-                    available.y - (indicatorOffset + available.y - MAX_OFFSET)
+                val diff = if (indicatorOffset + available.y > maxOffset) {
+                    available.y - (indicatorOffset + available.y - maxOffset)
                 } else if (indicatorOffset + available.y < 0) {
                     0f
                 } else {
@@ -137,7 +141,7 @@ fun PullToRefresh(
             available: Velocity
         ): Velocity {
             if (!isRefreshing) {
-                if (indicatorOffset > MIN_REFRESH_OFFSET) {
+                if (indicatorOffset > minRefreshOffset) {
                     onRefresh()
                     isRefreshingInternal = true
                 } else {
@@ -171,8 +175,8 @@ fun PullToRefresh(
                 .fillMaxWidth()
                 .absoluteOffset(y = absoluteOffset)
                 .scale(scaleAnimation)
-                .rotate(if (indicatorOffset > MIN_REFRESH_OFFSET) (indicatorOffset - MIN_REFRESH_OFFSET) else 0f),
-            progress = if (!isRefreshing) indicatorOffset / MAX_OFFSET * PERCENT_INDICATOR_PROGRESS_ON_DRAG else null
+                .rotate(if (indicatorOffset > minRefreshOffset) (indicatorOffset - minRefreshOffset) else 0f),
+            progress = if (!isRefreshing) indicatorOffset / maxOffset * PERCENT_INDICATOR_PROGRESS_ON_DRAG else null
         )
     }
 }
