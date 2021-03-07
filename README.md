@@ -1,4 +1,5 @@
-#PullToRefresh Composable.
+# PullToRefresh Composable
+
 This repository contains Jetpack Compose implementation of pull to refresh layout.
 
 Here's what its basic usage looks like:
@@ -18,11 +19,13 @@ fun composableFun() {
     ) {
         // Any composable content can go here
         LazyColumn {
-            elements.map { Text("I'm $it") }
+            items.map { Text("I'm $it") }
         }
     }
 }
 ```
+
+You can find more in [sample](https://github.com/poculeka/PullToRefresh/blob/master/pulltorefresh/app/src/main/java/com/puculek/pulltorefresh/samples/PullToRefreshSample.kt)
 
 # Dependency
 
