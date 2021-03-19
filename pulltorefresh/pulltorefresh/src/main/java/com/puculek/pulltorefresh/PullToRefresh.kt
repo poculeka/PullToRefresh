@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.CombinedModifier
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -155,7 +157,7 @@ fun PullToRefresh(
 
     Box(
         modifier = CombinedModifier(
-            inner = Modifier.nestedScroll(nestedScrollConnection),
+            inner = Modifier.nestedScroll(nestedScrollConnection).clip(RectangleShape),
             outer = modifier
         )
     ) {
