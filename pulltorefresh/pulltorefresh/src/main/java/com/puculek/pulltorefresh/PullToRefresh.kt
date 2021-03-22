@@ -176,7 +176,10 @@ fun PullToRefresh(
                 .absoluteOffset(y = absoluteOffset)
                 .scale(scaleAnimation)
                 .rotate(if (indicatorOffset > minRefreshOffset) (indicatorOffset - minRefreshOffset) else 0f),
-            progress = if (!isRefreshing) indicatorOffset / maxOffset * PERCENT_INDICATOR_PROGRESS_ON_DRAG else null
+            progress = when {
+                !isRefreshing && !isFinishingRefresh -> indicatorOffset / maxOffset * PERCENT_INDICATOR_PROGRESS_ON_DRAG
+                else -> null
+            }
         )
     }
 }
