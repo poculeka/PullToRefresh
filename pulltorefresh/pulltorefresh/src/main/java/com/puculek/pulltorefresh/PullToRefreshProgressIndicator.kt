@@ -24,6 +24,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+
+private val CircularIndicatorDiameter = 40.dp
+private const val strokeWidthPx = 2.5f
+
+
 @Composable
 internal fun PullToRefreshProgressIndicator(
     modifier: Modifier = Modifier,
@@ -42,7 +47,6 @@ internal fun PullToRefreshProgressIndicator(
             backgroundColor = Color.White
         ) {
             val padding = Modifier.padding(8.dp)
-            val strokeWidthPx = 2.5f
             val strokeWidth = with(LocalDensity.current) {
                 (strokeWidthPx * this.density).toDp()
             }
@@ -63,7 +67,6 @@ internal fun PullToRefreshProgressIndicator(
     }
 }
 
-private val CircularIndicatorDiameter = 40.dp
 
 @Composable
 fun ProgressIndicatorWithArrow(
