@@ -169,16 +169,29 @@ fun PullToRefresh(
             0f
         }
         val absoluteOffset = BASE_OFFSET.dp + with(LocalDensity.current) {
-            (indicatorOffset - offsetPx).toDp()
+            val diffedOffset = indicatorOffset - offsetPx
+            val calculated = calculateAbsoluteOffset(diffedOffset, MAX_OFFSET)
+            calculated.toDp()
         }
-
+        val progressFromOffset = with(LocalDensity.current) {
+            val coeff = MAX_OFFSET / (MAX_OFFSET - BASE_OFFSET)
+            (indicatorOffset - BASE_OFFSET) / maxOffset * coeff
+        }
         PullToRefreshProgressIndicator(
             modifier = Modifier
                 .fillMaxWidth()
                 .absoluteOffset(y = absoluteOffset)
                 .scale(scaleAnimation)
-                .rotate(if (indicatorOffset > minRefreshOffset) (indicatorOffset - minRefreshOffset) else 0f),
-            progress = if (!isRefreshing) indicatorOffset / maxOffset * PERCENT_INDICATOR_PROGRESS_ON_DRAG else null
+                .rotate(indicatorOffset / MAX_OFFSET * 180 + 110),
+            progress = when {
+                !isRefreshing && !isFinishingRefresh -> progressFromOffset * PERCENT_INDICATOR_PROGRESS_ON_DRAG
+                else -> null
+            }
         )
     }
+}
+
+private fun calculateAbsoluteOffset(absoluteOffset: Float, maxOffset: Float): Float {
+    // TODO: Match best function to imitate physics
+    return absoluteOffset
 }
