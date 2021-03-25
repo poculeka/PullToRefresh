@@ -168,14 +168,13 @@ fun PullToRefresh(
         }
         val absoluteOffset = BASE_OFFSET.dp + with(LocalDensity.current) {
             val diffedOffset = indicatorOffset - offsetPx
-            val calculated = diffedOffset * calculateOffsetCoefficient(diffedOffset, MAX_OFFSET)
+            val calculated = calculateAbsoluteOffset(diffedOffset, MAX_OFFSET)
             calculated.toDp()
         }
         val progressFromOffset = with(LocalDensity.current) {
             val coeff = MAX_OFFSET / (MAX_OFFSET - BASE_OFFSET)
             (indicatorOffset - BASE_OFFSET) / maxOffset * coeff
         }
-
         PullToRefreshProgressIndicator(
             modifier = Modifier
                 .fillMaxWidth()
@@ -190,7 +189,7 @@ fun PullToRefresh(
     }
 }
 
-private fun calculateOffsetCoefficient(absoluteOffset: Float, maxOffset: Float): Float {
+private fun calculateAbsoluteOffset(absoluteOffset: Float, maxOffset: Float): Float {
     // TODO: Match best function to imitate physics
-    return 1f
+    return absoluteOffset
 }
