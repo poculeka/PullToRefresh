@@ -30,12 +30,15 @@ private const val BASE_OFFSET = -48
  * A layout composable with [content].
  *
  * Example usage:
- * @sample com.puculek.pulltorefresh.samples.PullToRefreshPreview
+ * @sample com.puculek.pulltorefresh.samples.PullToRefreshWithColumn
+ * @sample com.puculek.pulltorefresh.samples.PullToRefreshWithLazyColumn
  *
  * @param modifier The modifier to be applied to the layout.
  * @param maxOffset How many pixels can the progress indicator can be dragged down
  * @param minRefreshOffset Minimum drag value to trigger [onRefresh]
  * @param isRefreshing Flag describing if [PullToRefresh] is refreshing.
+ * @param progressColor Color of progress drawable.
+ * @param backgroundColor Background color of progress indicator.
  * @param onRefresh Callback to be called if layout is pulled to refresh.
  * @param content The content of the [PullToRefresh].
  */
