@@ -2,6 +2,7 @@ package com.puculek.pulltorefresh
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.CombinedModifier
 import androidx.compose.ui.Modifier
@@ -9,6 +10,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -43,6 +45,8 @@ fun PullToRefresh(
     maxOffset: Float = MAX_OFFSET,
     minRefreshOffset: Float = MIN_REFRESH_OFFSET,
     isRefreshing: Boolean,
+    progressColor: Color = MaterialTheme.colors.primary,
+    backgroundColor: Color = MaterialTheme.colors.surface,
     onRefresh: () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -157,7 +161,9 @@ fun PullToRefresh(
 
     Box(
         modifier = CombinedModifier(
-            inner = Modifier.nestedScroll(nestedScrollConnection).clip(RectangleShape),
+            inner = Modifier
+                .nestedScroll(nestedScrollConnection)
+                .clip(RectangleShape),
             outer = modifier
         )
     ) {
@@ -183,10 +189,12 @@ fun PullToRefresh(
                 .absoluteOffset(y = absoluteOffset)
                 .scale(scaleAnimation)
                 .rotate(indicatorOffset / MAX_OFFSET * 180 + 110),
+            progressColor = progressColor,
+            backgroundColor = backgroundColor,
             progress = when {
                 !isRefreshing && !isFinishingRefresh -> progressFromOffset * PERCENT_INDICATOR_PROGRESS_ON_DRAG
                 else -> null
-            }
+            },
         )
     }
 }

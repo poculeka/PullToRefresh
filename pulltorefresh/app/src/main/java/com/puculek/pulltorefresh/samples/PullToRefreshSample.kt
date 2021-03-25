@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Card
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -23,21 +25,25 @@ fun PullToRefreshWithLazyColumn() {
     var isRefreshing: Boolean by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     var elements by remember { mutableStateOf(listOf(5, 4, 3, 2, 1)) }
-    PullToRefresh(
-        isRefreshing = isRefreshing,
-        onRefresh = {
-            isRefreshing = true
-            scope.launch {
-                delay(1000)
-                elements = listOf(elements.size + 1) + elements
-                isRefreshing = false
-            }
 
-        }
-    ) {
-        LazyColumn {
-            elements.map {
-                item { Item(it.toString()) }
+    MaterialTheme {
+        PullToRefresh(
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                isRefreshing = true
+                scope.launch {
+                    delay(1000)
+                    elements = listOf(elements.size + 1) + elements
+                    isRefreshing = false
+                }
+            },
+            progressColor = Color.Red,
+            backgroundColor = Color.Green,
+        ) {
+            LazyColumn {
+                elements.map {
+                    item { Item(it.toString()) }
+                }
             }
         }
     }
@@ -48,24 +54,27 @@ fun PullToRefreshWithLazyColumn() {
 fun PullToRefreshWithColumn() {
     var isRefreshing: Boolean by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    var elements by remember { mutableStateOf(listOf(5, 4, 3, 2, 1)) }
-    PullToRefresh(
-        isRefreshing = isRefreshing,
-        onRefresh = {
-            isRefreshing = true
-            scope.launch {
-                delay(1000)
-                elements = listOf(elements.size + 1) + elements
-                isRefreshing = false
-            }
+    var elements by remember { mutableStateOf(listOf(4, 3, 2, 1)) }
 
-        }
-    ) {
-        Column(
-            modifier = Modifier.verticalScroll(rememberScrollState())
+    MaterialTheme {
+        PullToRefresh(
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                isRefreshing = true
+                scope.launch {
+                    delay(1000)
+                    elements = listOf(elements.size + 1) + elements
+                    isRefreshing = false
+                }
+
+            }
         ) {
-            elements.map {
-                Item(it.toString())
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState())
+            ) {
+                elements.map {
+                    Item(it.toString())
+                }
             }
         }
     }
@@ -73,19 +82,16 @@ fun PullToRefreshWithColumn() {
 
 @Composable
 fun Item(text: String) {
-    Column(
-        modifier = Modifier
-            .padding(24.dp)
-            .background(Color.Yellow)
-            .padding(16.dp)
-    ) {
-        Text(text, fontSize = 24.sp)
-        Text(
-            text = """
+    Card(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(8.dp)) {
+            Text(text, fontSize = 24.sp)
+            Text(
+                text = """
                Lorem ipsum dolor sit amet, consectetur adipiscing elit,
                ssed do eiusmod tempor incididunt ut labore et dolore magna aliqua
                """.trimIndent()
-        )
+            )
+        }
     }
 
 }
