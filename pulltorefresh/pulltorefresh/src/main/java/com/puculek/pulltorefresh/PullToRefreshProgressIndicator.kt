@@ -1,7 +1,6 @@
 package com.puculek.pulltorefresh
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
@@ -10,14 +9,11 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.DrawStyle
-import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.platform.LocalDensity
@@ -32,6 +28,8 @@ private const val strokeWidthPx = 2.5f
 @Composable
 internal fun PullToRefreshProgressIndicator(
     modifier: Modifier = Modifier,
+    progressColor: Color,
+    backgroundColor: Color,
     progress: Float? = null
 ) {
     Row(
@@ -44,7 +42,7 @@ internal fun PullToRefreshProgressIndicator(
                 .height(CircularIndicatorDiameter),
             shape = CircleShape,
             elevation = 6.dp,
-            backgroundColor = Color.White
+            backgroundColor = backgroundColor,
         ) {
             val padding = Modifier.padding(8.dp)
             val strokeWidth = with(LocalDensity.current) {
@@ -54,12 +52,14 @@ internal fun PullToRefreshProgressIndicator(
             if (progress == null) {
                 CircularProgressIndicator(
                     modifier = padding,
+                    color = progressColor,
                     strokeWidth = strokeWidth
                 )
             } else {
                 ProgressIndicatorWithArrow(
                     modifier = padding,
                     progress = progress,
+                    color = progressColor,
                     strokeWidth = strokeWidth
                 )
             }
