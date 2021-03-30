@@ -34,7 +34,7 @@ You can find more in [sample](https://github.com/poculeka/PullToRefresh/blob/mas
 
 You can include _PullToRefresh_ in your project from `mavenCentral()`:
 ```groovy
-    implementation 'com.puculek.pulltorefresh:pull-to-refresh-compose:1.0.4'
+    implementation 'com.puculek.pulltorefresh:pull-to-refresh-compose:1.0.5'
 ```
 
 # Showcase
