@@ -1,3 +1,6 @@
+# Deprecated!
+Now you can use [Accompanist version](https://google.github.io/accompanist/swiperefresh/)
+
 # PullToRefresh Composable
 
 This repository contains Jetpack Compose implementation of pull to refresh layout.
